@@ -35,14 +35,13 @@ func parseLinks(doc soup.Root, url string) []string {
 
 func parseLink(link soup.Root, url string) string {
 	href := link.Attrs()["href"]
-	if isFullUrl(href) {
+	if isFullURL(href) {
 		return href
-	} else {
-		return url + href
 	}
+	return url + href
 }
 
-func isFullUrl(link string) bool {
+func isFullURL(link string) bool {
 	candidateURL, err := url.Parse(link)
 	if err != nil {
 		log.Println(err.Error())

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hishboy/gocommons/lang"
@@ -16,6 +17,18 @@ type Links struct {
 func (links *Links) QueueLink(link string) {
 	if _, ok := links.Seen[link]; !ok {
 		links.Queue.Push(link)
+	}
+}
+
+// GetLink pull elements from the link queue until it finds a link that is not
+// in the list of seen links, upon which it returns
+func (links *Links) GetLink() string {
+	var urlCandidate string
+	for {
+		urlCandidate = links.Queue.Poll().(string)
+		if _, inSeen := links.Seen[urlCandidate]; !inSeen {
+			return urlCandidate
+		}
 	}
 }
 
@@ -42,4 +55,10 @@ func InitialLinks(seedLinks []string) *Links {
 		links.Queue.Push(link)
 	}
 	return links
+}
+
+// Report prints ifnormation about the links stuct
+func (links *Links) Report() {
+	fmt.Println("Seen links:", len(links.Seen))
+	fmt.Println("Queued links:", links.Queue.Len())
 }
