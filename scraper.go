@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/url"
 	"regexp"
@@ -28,7 +27,6 @@ func parseLinks(doc soup.Root, url string) []string {
 	parsedLinks := make([]string, len(links))
 	for index, link := range links {
 		parsedLinks[index] = parseLink(link, url)
-		fmt.Println(parseLink(link, url))
 	}
 	return parsedLinks
 }
@@ -38,7 +36,18 @@ func parseLink(link soup.Root, url string) string {
 	if isFullURL(href) {
 		return href
 	}
-	return url + href
+	return mergeLink(url, href)
+}
+
+func mergeLink(baseURL, href string) string {
+	char := "/"
+	if strings.HasSuffix(baseURL, char) {
+		baseURL = baseURL[:len(baseURL)-len(char)]
+	}
+	if strings.HasPrefix(href, char) {
+		href = href[len(char):]
+	}
+	return baseURL + char + href
 }
 
 func isFullURL(link string) bool {
