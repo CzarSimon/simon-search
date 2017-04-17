@@ -8,10 +8,10 @@ type Page struct {
 	Links            []string
 }
 
-func createPage(title, url string, links []string) Page {
+func createPage(title, text, url string, links []string) Page {
 	return Page{
 		Title: title,
-		Text:  "text",
+		Text:  text,
 		URL:   url,
 		Links: links,
 	}

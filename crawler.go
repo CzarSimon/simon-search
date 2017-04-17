@@ -7,16 +7,18 @@ import (
 
 // Crawl continously scrapes pages, putting new links on the link queue and storing
 func Crawl(links *Links) {
-	if links.Queue.Len() < 1 {
-		time.Sleep(1000)
-		// continue
+	for {
+		if links.Queue.Len() < 1 {
+			time.Sleep(1000)
+			continue
+		}
+		CrawlURL(links.GetLink(), links)
 	}
-	CrawlURL(links.GetLink(), links)
 }
 
 // CrawlURL performs crawl on a specified url
 func CrawlURL(url string, links *Links) {
-	page, err := scrapePage(url)
+	page, err := ScrapePage(url)
 	if err != nil {
 		log.Println(err)
 	} else {

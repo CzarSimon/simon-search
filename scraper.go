@@ -11,18 +11,50 @@ import (
 	"github.com/surgebase/porter2"
 )
 
-func scrapePage(url string) (Page, error) {
+// ScrapePage retrives and parses the html document pointed to by an URL
+func ScrapePage(url string) (Page, error) {
 	html, err := soup.Get(url)
 	if err != nil {
 		return Page{}, err
 	}
 	doc := soup.HTMLParse(html)
-	links := parseLinks(doc, url)
-	text := "title"
-	return createPage(text, url, links), nil
+	links := parseLinks(&doc, url)
+	title := parseTitle(&doc)
+	text := parseText(title, &doc)
+	return createPage(title, text, url, links), nil
 }
 
-func parseLinks(doc soup.Root, url string) []string {
+func parseTitle(doc *soup.Root) string {
+	return doc.Find("title").Text()
+}
+
+func parseText(text string, doc *soup.Root) string {
+	for _, tag := range getTags() {
+		text += " " + getTagText(tag, doc)
+	}
+	return formatWords(text)
+}
+
+func joinWords(words []string) string {
+	textBody := strings.Join(words, " ")
+	textBody = strings.TrimSpace(textBody)
+	re := regexp.MustCompile(`[\s\p{Zs}]{2,}`)
+	return re.ReplaceAllString(textBody, "")
+}
+
+func getTagText(tag string, doc *soup.Root) string {
+	text := ""
+	for _, node := range doc.FindAll(tag) {
+		text += " " + node.Text()
+	}
+	return text
+}
+
+func getTags() []string {
+	return []string{"p", "h1", "h2", "h3", "h4", "h5", "a"}
+}
+
+func parseLinks(doc *soup.Root, url string) []string {
 	links := doc.FindAll("a")
 	parsedLinks := make([]string, len(links))
 	for index, link := range links {
@@ -64,14 +96,14 @@ func isEnglish(text string) bool {
 	return lang == "en"
 }
 
-func formatWords(textBody string) []string {
+func formatWords(textBody string) string {
 	words := strings.Split(textBody, " ")
 	cleanWords := make([]string, len(words))
 	re := regexp.MustCompile("\\W")
 	for index, word := range words {
 		cleanWords[index] = stem(removePunctuation(word, re))
 	}
-	return cleanWords
+	return joinWords(cleanWords)
 }
 
 func removePunctuation(str string, re *regexp.Regexp) string {
